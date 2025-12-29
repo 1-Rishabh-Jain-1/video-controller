@@ -21,6 +21,17 @@ new MutationObserver(registerVideos).observe(document.body, { childList: true, s
 document.addEventListener("keydown", (e) => {
     if (!currentVideo) return;
 
+    if (!isNaN(e.key)) {
+        const num = Number(e.key);
+        if (num === 0) {
+            currentVideo.currentTime = 0;
+        } else {
+            currentVideo.currentTime = currentVideo.duration * (num / 10);
+        }
+        console.log(`⏩ Jump: ${num * 10}%`);
+        return;
+    }
+
     switch (e.key.toLowerCase()) {
         case "d": // speed up
             currentVideo.playbackRate = Math.min(currentVideo.playbackRate + 0.1, 16);
