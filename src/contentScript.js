@@ -1,15 +1,21 @@
 // Track the active video
 let currentVideo = null;
 
-function findVideo() {
-    const videos = document.querySelectorAll("video");
-    if (videos.length > 0) currentVideo = videos[0];
-}
-findVideo();
+// Hover switching
+document.addEventListener("mouseover", (e) => {
+  if (e.target.tagName === "VIDEO") currentVideo = e.target;
+});
 
-// Detect newly added videos too (YouTube loads dynamically)
-const observer = new MutationObserver(findVideo);
-observer.observe(document.body, { subtree: true, childList: true });
+// Playing video takes control
+function registerVideos() {
+  const videos = document.querySelectorAll("video");
+  videos.forEach(video => {
+    video.addEventListener("play", () => currentVideo = video);
+  });
+}
+registerVideos();
+
+new MutationObserver(registerVideos).observe(document.body, { childList: true, subtree: true });
 
 // Keyboard shortcuts (page level only)
 document.addEventListener("keydown", (e) => {
