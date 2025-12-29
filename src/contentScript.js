@@ -45,6 +45,7 @@ document.addEventListener("keydown", (e) => {
 
         case "r":
             currentVideo.playbackRate = 1.0;
+            break;
 
         case "x": // seek forward
             currentVideo.currentTime += 10;
