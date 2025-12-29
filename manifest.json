@@ -1,30 +1,40 @@
 {
-    "manifest_version": 3,
-    "name": "Video Speed & Seek Controller",
-    "version": "1.0.0",
-    "description": "Control HTML video playback with keyboard + React widget.",
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "contentScript.js"
-            ]
-        }
-    ],
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "injectReact.js"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ],
-    "permissions": [
-        "activeTab",
-        "storage"
-    ]
+  "manifest_version": 3,
+  "name": "Video Speed & Seek Controller",
+  "version": "1.0.0",
+  "description": "Control HTML video playback with keyboard + React widget.",
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/extensionIcon16.png",
+      "64": "icons/extensionIcon64.png",
+      "128": "icons/extensionIcon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/extensionIcon16.png",
+    "64": "icons/extensionIcon64.png",
+    "128": "icons/extensionIcon128.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"]
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["injectReact.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "permissions": [
+    "activeTab",
+    "storage"
+  ]
 }

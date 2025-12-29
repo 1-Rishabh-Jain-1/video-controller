@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && copy manifest.json dist\\ && copy src\\contentScript.js dist\\",
+    "build": "vite build && copy manifest.json dist\\ && copy src\\contentScript.js dist\\ && copy popup.html dist\\ && if not exist dist\\icons mkdir dist\\icons && copy icons\\* dist\\icons\\",
     "lint": "eslint .",
     "preview": "vite preview"
   },
