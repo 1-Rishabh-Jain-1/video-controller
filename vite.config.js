@@ -9,10 +9,12 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        "react-ui": resolve(__dirname, "src/ui/VideoWidget.jsx")
+        "injectReact": resolve(__dirname, "src/injectReact.jsx")
       },
       output: {
-        entryFileNames: "react-ui.js"
+        entryFileNames: "[name].js",
+        format: "iife",
+        name: "VideoControllerReact"
       },
     }
   }
