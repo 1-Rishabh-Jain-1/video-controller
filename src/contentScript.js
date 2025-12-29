@@ -67,59 +67,59 @@ document.addEventListener("keydown", (e) => {
 let reactScriptLoaded = false;
 
 function loadReactScript() {
-  if (reactScriptLoaded) return;
-  reactScriptLoaded = true;
-  
-  const script = document.createElement("script");
-  script.src = chrome.runtime.getURL("injectReact.js");
-  script.onload = () => {
-    console.log("✅ React injection script loaded");
-  };
-  script.onerror = () => {
-    console.error("❌ Failed to load React injection script");
-    reactScriptLoaded = false;
-  };
-  document.head.appendChild(script);
+    if (reactScriptLoaded) return;
+    reactScriptLoaded = true;
+
+    const script = document.createElement("script");
+    script.src = chrome.runtime.getURL("injectReact.js");
+    script.onload = () => {
+        console.log("✅ React injection script loaded");
+    };
+    script.onerror = () => {
+        console.error("❌ Failed to load React injection script");
+        reactScriptLoaded = false;
+    };
+    document.head.appendChild(script);
 }
 
 // Load React script when DOM is ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", loadReactScript);
+    document.addEventListener("DOMContentLoaded", loadReactScript);
 } else {
-  loadReactScript();
+    loadReactScript();
 }
 
 function attachWidgetToVideo(video) {
-  // Avoid duplicates on same video
-  if (video.parentElement.querySelector(".video-controller-widget")) return;
+    // Avoid duplicates on same video
+    if (video.parentElement.querySelector(".video-controller-widget")) return;
 
-  // Ensure video container can hold absolute children
-  const parent = video.parentElement;
-  if (!parent) return;
-  
-  parent.style.position = "relative";
+    // Ensure video container can hold absolute children
+    const parent = video.parentElement;
+    if (!parent) return;
 
-  // Create container
-  const container = document.createElement("div");
-  container.className = "video-controller-widget";
-  container.style.position = "absolute";
-  container.style.top = "10px";
-  container.style.left = "10px";
-  container.style.zIndex = "999999";
-  container.style.minWidth = "140px";
-  container.style.minHeight = "40px";
-  container.style.pointerEvents = "auto";
-  
-  parent.appendChild(container);
-  
-  // Trigger React injection (it will find this container via MutationObserver)
-  console.log("📦 Widget container created, waiting for React injection...");
+    parent.style.position = "relative";
+
+    // Create container
+    const container = document.createElement("div");
+    container.className = "video-controller-widget";
+    container.style.position = "absolute";
+    container.style.top = "10px";
+    container.style.left = "10px";
+    container.style.zIndex = "999999";
+    container.style.minWidth = "140px";
+    container.style.minHeight = "40px";
+    container.style.pointerEvents = "auto";
+
+    parent.appendChild(container);
+
+    // Trigger React injection (it will find this container via MutationObserver)
+    console.log("📦 Widget container created, waiting for React injection...");
 }
 
 function toggleWidgets() {
-  document.querySelectorAll(".video-controller-widget").forEach(widget => {
-    widget.style.display = widget.style.display === "none" ? "block" : "none";
-  });
+    document.querySelectorAll(".video-controller-widget").forEach(widget => {
+        widget.style.display = widget.style.display === "none" ? "block" : "none";
+    });
 }
 
 console.log("🎬 Video Controller Loaded");
