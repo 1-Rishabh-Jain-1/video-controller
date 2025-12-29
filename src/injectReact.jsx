@@ -36,13 +36,25 @@ if (document.body) {
   bodyObserver.observe(document.documentElement, { childList: true });
 }
 
-// Re-run if any new widgets appear (YouTube/Netflix dynamic loading)
+// Listen for custom event when widget is created
+document.addEventListener("video-controller-widget-created", mountWidgets);
+
+// Re-run if any new widgets appear (only watching for widget containers, not videos)
 const obs = new MutationObserver(() => {
-  mountWidgets();
+  // Only check if there are unmounted widget containers
+  const unmounted = document.querySelectorAll(".video-controller-widget:not([data-rendered])");
+  if (unmounted.length > 0) {
+    mountWidgets();
+  }
 });
 obs.observe(document.body || document.documentElement, {
   childList: true,
   subtree: true
 });
+
+// Expose mount function globally for immediate mounting
+if (typeof window !== "undefined") {
+  window.VideoControllerReact = { mountWidgets };
+}
 
 console.log("⚛️ React injection script loaded and ready!");

@@ -1,22 +1,29 @@
 // Track the active video
 let currentVideo = null;
+let currentWidget = null;
 
-// Hover switching
-document.addEventListener("mouseover", (e) => {
-    if (e.target.tagName === "VIDEO") currentVideo = e.target;
-});
+// Use event delegation - listen for 'play' events on document level
+// This catches all videos (existing, dynamically added, in iframes) without constant DOM queries
+document.addEventListener("play", handleVideoPlay, true); // Use capture phase
 
-// Playing video takes control
-function registerVideos() {
-    const videos = document.querySelectorAll("video");
-    videos.forEach(video => {
-        video.addEventListener("play", () => currentVideo = video);
-        attachWidgetToVideo(video);
-    });
+// Handle when a video starts playing
+function handleVideoPlay(event) {
+    const video = event.target;
+    
+    // Only handle video elements
+    if (video.tagName !== "VIDEO") return;
+    
+    currentVideo = video;
+    
+    // Remove widget from previous video
+    if (currentWidget && currentWidget.parentElement) {
+        currentWidget.remove();
+        currentWidget = null;
+    }
+    
+    // Attach widget to currently playing video
+    attachWidgetToVideo(video);
 }
-registerVideos();
-
-new MutationObserver(registerVideos).observe(document.body, { childList: true, subtree: true });
 
 // Keyboard shortcuts (page level only)
 document.addEventListener("keydown", (e) => {
@@ -90,8 +97,11 @@ if (document.readyState === "loading") {
 }
 
 function attachWidgetToVideo(video) {
-    // Avoid duplicates on same video
-    if (video.parentElement.querySelector(".video-controller-widget")) return;
+    // Remove any existing widget on this video
+    const existingWidget = video.parentElement?.querySelector(".video-controller-widget");
+    if (existingWidget) {
+        existingWidget.remove();
+    }
 
     // Ensure video container can hold absolute children
     const parent = video.parentElement;
@@ -111,15 +121,22 @@ function attachWidgetToVideo(video) {
     container.style.pointerEvents = "auto";
 
     parent.appendChild(container);
+    currentWidget = container;
 
-    // Trigger React injection (it will find this container via MutationObserver)
-    console.log("📦 Widget container created, waiting for React injection...");
+    // Trigger React injection immediately
+    if (window.VideoControllerReact) {
+        // React script already loaded, trigger mount
+        const event = new CustomEvent("video-controller-widget-created");
+        document.dispatchEvent(event);
+    }
+    
+    console.log("📦 Widget container created for playing video");
 }
 
 function toggleWidgets() {
-    document.querySelectorAll(".video-controller-widget").forEach(widget => {
-        widget.style.display = widget.style.display === "none" ? "block" : "none";
-    });
+    if (currentWidget) {
+        currentWidget.style.display = currentWidget.style.display === "none" ? "block" : "none";
+    }
 }
 
 console.log("🎬 Video Controller Loaded");
