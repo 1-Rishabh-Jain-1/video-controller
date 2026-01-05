@@ -1,6 +1,7 @@
 // Track the active video
 let currentVideo = null;
 let currentWidget = null;
+let widgetVisible = true;
 
 // Use event delegation - listen for 'play' events on document level
 // This catches all videos (existing, dynamically added, in iframes) without constant DOM queries
@@ -9,51 +10,65 @@ document.addEventListener("play", handleVideoPlay, true); // Use capture phase
 // Handle when a video starts playing
 function handleVideoPlay(event) {
     const video = event.target;
-    
+
     // Only handle video elements
     if (video.tagName !== "VIDEO") return;
-    
+
     currentVideo = video;
-    
+
     // Remove widget from previous video
     if (currentWidget && currentWidget.parentElement) {
         currentWidget.remove();
         currentWidget = null;
     }
-    
+
     // Attach widget to currently playing video
     attachWidgetToVideo(video);
 }
+
+function applyWidgetVisibility() {
+    if (!currentWidget) return;
+    currentWidget.style.display = widgetVisible ? "block" : "none";
+}
+
+chrome.storage.sync.get(["widgetVisible"], (result) => {
+    if (typeof result.widgetVisible === "boolean") {
+        widgetVisible = result.widgetVisible;
+        applyWidgetVisibility();
+    }
+});
 
 // Keyboard shortcuts (page level only)
 document.addEventListener("keydown", (e) => {
     if (!currentVideo) return;
 
-    if (!isNaN(e.key)) {
-        const num = Number(e.key);
+    const active = document.activeElement;
+    if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) {
+        return;
+    }
+
+    if (e.key >= "0" && e.key <= "9") {
+        const num = e.key.charCodeAt(0) - 48;
         if (num === 0) {
             currentVideo.currentTime = 0;
         } else {
             currentVideo.currentTime = currentVideo.duration * (num / 10);
         }
-        console.log(`⏩ Jump: ${num * 10}%`);
+
         return;
     }
 
     switch (e.key.toLowerCase()) {
         case "d": // speed up
             currentVideo.playbackRate = Math.min(currentVideo.playbackRate + 0.1, 16);
-            console.log("--------------------currentVideo.playbackRate" + currentVideo.playbackRate + "--------------------");
             break;
 
         case "s": // speed down
             currentVideo.playbackRate = Math.max(currentVideo.playbackRate - 0.1, 0.1);
-            console.log("--------------------currentVideo.playbackRate" + currentVideo.playbackRate + "--------------------");
             break;
 
         case "r":
             currentVideo.playbackRate = 1.0;
-            console.log("--------------------currentVideo.playbackRate" + currentVideo.playbackRate + "--------------------");
             break;
 
         case "x": // seek forward
@@ -65,7 +80,9 @@ document.addEventListener("keydown", (e) => {
             break;
 
         case "v": // toggle React widget visibility
-            toggleWidgets();
+            widgetVisible = !widgetVisible;
+            chrome.storage.sync.set({ widgetVisible });
+            applyWidgetVisibility();
             break;
     }
 });
@@ -123,13 +140,8 @@ function attachWidgetToVideo(video) {
     parent.appendChild(container);
     currentWidget = container;
 
-    // Trigger React injection immediately
-    if (window.VideoControllerReact) {
-        // React script already loaded, trigger mount
-        const event = new CustomEvent("video-controller-widget-created");
-        document.dispatchEvent(event);
-    }
-    
+    applyWidgetVisibility();
+
     console.log("📦 Widget container created for playing video");
 }
 
