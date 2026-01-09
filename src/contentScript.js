@@ -3,6 +3,10 @@ let currentVideo = null;
 let currentWidget = null;
 let widgetVisible = true;
 
+// Storage keys
+const SITE_KEY = `widgetVisible:${location.hostname}`;
+const GLOBAL_KEY = "widgetVisibleGlobal";
+
 // Use event delegation - listen for 'play' events on document level
 // This catches all videos (existing, dynamically added, in iframes) without constant DOM queries
 document.addEventListener("play", handleVideoPlay, true); // Use capture phase
@@ -31,11 +35,15 @@ function applyWidgetVisibility() {
     currentWidget.style.display = widgetVisible ? "block" : "none";
 }
 
-chrome.storage.sync.get(["widgetVisible"], (result) => {
-    if (typeof result.widgetVisible === "boolean") {
-        widgetVisible = result.widgetVisible;
-        applyWidgetVisibility();
+chrome.storage.sync.get([SITE_KEY, GLOBAL_KEY], (result) => {
+    if (typeof result[SITE_KEY] === "boolean") {
+        widgetVisible = result[SITE_KEY];
+    } else if (typeof result[GLOBAL_KEY] === "boolean") {
+        widgetVisible = result[GLOBAL_KEY];
+    } else {
+        widgetVisible = true; // default
     }
+    applyWidgetVisibility();
 });
 
 // Keyboard shortcuts (page level only)
@@ -79,9 +87,15 @@ document.addEventListener("keydown", (e) => {
             currentVideo.currentTime -= 10;
             break;
 
-        case "v": // toggle React widget visibility
+        case "v": // toggle React widget visibility site-wise
             widgetVisible = !widgetVisible;
-            chrome.storage.sync.set({ widgetVisible });
+            chrome.storage.sync.set({ [SITE_KEY]: widgetVisible });
+            applyWidgetVisibility();
+            break;
+
+        case "h": // toggle React widget visibility globally
+            widgetVisible = !widgetVisible;
+            chrome.storage.sync.set({ [GLOBAL_KEY]: widgetVisible });
             applyWidgetVisibility();
             break;
     }
